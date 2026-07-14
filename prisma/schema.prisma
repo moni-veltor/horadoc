@@ -8,8 +8,11 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // Variables creadas por la integración de Neon en Vercel (prefijo del store).
+  //  • *_POSTGRES_PRISMA_URL    → pooled + pgbouncer (runtime de la app)
+  //  • *_POSTGRES_URL_NON_POOLING → directa (migraciones / db push)
+  url       = env("horadoc_POSTGRES_PRISMA_URL")
+  directUrl = env("horadoc_POSTGRES_URL_NON_POOLING")
 }
 
 model User {
