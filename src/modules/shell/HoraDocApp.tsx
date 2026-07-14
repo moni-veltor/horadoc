@@ -101,6 +101,8 @@ export default function HoraDocApp() {
               resumen={store.resumen}
               onAgregar={store.agregarClinica}
               onActualizarTarifa={store.actualizarTarifa}
+              onAgregarEspecialidad={store.agregarEspecialidad}
+              onEliminarEspecialidad={store.eliminarEspecialidad}
             />
           )}
           {tab === "resumen" && (

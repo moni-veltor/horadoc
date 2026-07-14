@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { CURRENT_MONTH, TODAY } from "@/core/clock";
 import { clinicPalette } from "@/core/theme";
 import { hoursOn, monthlySummary } from "@/domain/calculations";
-import { initialClinics, initialEntries, specialties } from "@/domain/seed";
-import type { Clinic, Entry, EntryForm } from "@/domain/types";
+import { initialClinics, initialEntries } from "@/domain/seed";
+import { clinicSpecialties } from "@/domain/specialties";
+import type { Clinic, Entry, EntryForm, Specialty } from "@/domain/types";
 
 export interface Toast {
   type: "ok" | "error";
@@ -11,6 +12,7 @@ export interface Toast {
 }
 
 const emptyFormPatch = { hours: "", notes: "" };
+const firstSpecialty = clinicSpecialties(initialClinics[0])[0] ?? "";
 
 /**
  * Owns all HoraDoc data (clinics, entries, form draft, toasts) and the actions
@@ -24,7 +26,7 @@ export function useHoraDoc() {
   const [toast, setToast] = useState<Toast | null>(null);
   const [form, setForm] = useState<EntryForm>({
     clinicId: initialClinics[0].id,
-    specialty: specialties[0],
+    specialty: firstSpecialty,
     date: TODAY,
     hours: "",
     notes: "",
@@ -42,20 +44,21 @@ export function useHoraDoc() {
       setToast({ type: "error", text: "Ingresa nombre y tarifa válidos." });
       return;
     }
-    const rates: Record<string, number> = {};
-    specialties.forEach((s) => (rates[s] = Number(tarifaBase)));
+    // La clínica nace sin especialidades; el médico las agrega desde su tarjeta.
+    // La tarifa base queda como valor por defecto de cada especialidad nueva.
     setClinics((prev) => [
       ...prev,
       {
         id: "c" + Date.now(),
         name: nombre,
-        rates,
+        rates: {},
+        defaultRate: Number(tarifaBase),
         color: clinicPalette[prev.length % clinicPalette.length],
       },
     ]);
     setToast({
       type: "ok",
-      text: "Clínica agregada. Ajusta la tarifa por especialidad si varía.",
+      text: "Clínica agregada. Agrégale especialidades para registrar horas.",
     });
   }
 
@@ -69,8 +72,48 @@ export function useHoraDoc() {
     );
   }
 
+  function agregarEspecialidad(clinicId: string, specialty: Specialty) {
+    if (!specialty) return;
+    setClinics((prev) =>
+      prev.map((c) => {
+        if (c.id !== clinicId || c.rates[specialty] !== undefined) return c;
+        return { ...c, rates: { ...c.rates, [specialty]: c.defaultRate ?? 0 } };
+      }),
+    );
+    setToast({ type: "ok", text: `${specialty} agregada. Ajusta su tarifa si aplica.` });
+  }
+
+  function eliminarEspecialidad(clinicId: string, specialty: Specialty) {
+    const enUso = entries.some(
+      (e) => e.clinicId === clinicId && e.specialty === specialty,
+    );
+    if (enUso) {
+      setToast({
+        type: "error",
+        text: "No puedes eliminar una especialidad con horas registradas.",
+      });
+      return;
+    }
+    setClinics((prev) =>
+      prev.map((c) => {
+        if (c.id !== clinicId) return c;
+        const rest = { ...c.rates };
+        delete rest[specialty];
+        return { ...c, rates: rest };
+      }),
+    );
+    setToast({ type: "ok", text: "Especialidad eliminada." });
+  }
+
   /** Returns true on success so the caller can navigate away. */
   function guardarRegistro(): boolean {
+    if (!form.specialty) {
+      setToast({
+        type: "error",
+        text: "Selecciona una especialidad para esta clínica.",
+      });
+      return false;
+    }
     if (!form.hours || Number(form.hours) <= 0) {
       setToast({ type: "error", text: "Ingresa un número de horas válido." });
       return false;
@@ -126,6 +169,8 @@ export function useHoraDoc() {
     hoyTotal,
     agregarClinica,
     actualizarTarifa,
+    agregarEspecialidad,
+    eliminarEspecialidad,
     guardarRegistro,
     editarRegistro,
     eliminarRegistro,

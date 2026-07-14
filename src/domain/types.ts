@@ -7,8 +7,10 @@ export interface Clinic {
   id: string;
   name: string;
   color: string;
-  /** Hourly rate (COP) per specialty. */
+  /** Hourly rate (COP) per specialty. Its keys are the clinic's specialties. */
   rates: Record<Specialty, number>;
+  /** Default hourly rate applied when a new specialty is added to this clinic. */
+  defaultRate?: number;
 }
 
 export interface Entry {

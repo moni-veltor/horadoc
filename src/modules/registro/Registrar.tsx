@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { specialties } from "@/domain/seed";
+import { clinicSpecialties } from "@/domain/specialties";
 import type { Clinic, Entry, EntryForm } from "@/domain/types";
 import { fontDisplay, fontMono, theme } from "@/core/theme";
 import { Card } from "@/shared/ui/Card";
@@ -28,6 +28,19 @@ export function Registrar({
   const clinicName = (id: string) => clinics.find((c) => c.id === id)?.name || "—";
   const recientes = [...entries].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 8);
 
+  // El dropdown de especialidad depende de la clínica seleccionada.
+  const selectedClinic = clinics.find((c) => c.id === form.clinicId);
+  const especialidades = selectedClinic ? clinicSpecialties(selectedClinic) : [];
+  const sinEspecialidades = especialidades.length === 0;
+
+  function onClinicChange(clinicId: string) {
+    const next = clinics.find((c) => c.id === clinicId);
+    const espec = next ? clinicSpecialties(next) : [];
+    // Conserva la especialidad si la nueva clínica también la tiene; si no, toma la primera.
+    const specialty = espec.includes(form.specialty) ? form.specialty : espec[0] ?? "";
+    setForm({ ...form, clinicId, specialty });
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -46,7 +59,7 @@ export function Registrar({
         className="w-full mb-3 p-3 rounded-lg border text-sm"
         style={{ borderColor: theme.primaryLight, background: theme.surface }}
         value={form.clinicId}
-        onChange={(e) => setForm({ ...form, clinicId: e.target.value })}
+        onChange={(e) => onClinicChange(e.target.value)}
       >
         {clinics.map((c) => (
           <option key={c.id} value={c.id}>{c.name}</option>
@@ -58,12 +71,26 @@ export function Registrar({
         className="w-full mb-3 p-3 rounded-lg border text-sm"
         style={{ borderColor: theme.primaryLight, background: theme.surface }}
         value={form.specialty}
+        disabled={sinEspecialidades}
         onChange={(e) => setForm({ ...form, specialty: e.target.value })}
       >
-        {specialties.map((s) => (
-          <option key={s} value={s}>{s}</option>
-        ))}
+        {sinEspecialidades ? (
+          <option value="">Sin especialidades</option>
+        ) : (
+          especialidades.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))
+        )}
       </select>
+      {sinEspecialidades && (
+        <div
+          className="rounded-lg px-3 py-2 mb-3 text-xs"
+          style={{ background: theme.accentLight, color: theme.accent }}
+        >
+          Esta clínica aún no tiene especialidades. Agrégalas en la pestaña
+          Clínicas para poder registrar horas.
+        </div>
+      )}
 
       <label className="text-xs" style={{ color: theme.muted }}>Fecha</label>
       <input
@@ -96,8 +123,13 @@ export function Registrar({
 
       <button
         onClick={onGuardar}
+        disabled={sinEspecialidades}
         className="w-full py-3 rounded-xl font-medium text-sm"
-        style={{ background: theme.primary, color: "#fff" }}
+        style={{
+          background: sinEspecialidades ? theme.muted : theme.primary,
+          color: "#fff",
+          opacity: sinEspecialidades ? 0.6 : 1,
+        }}
       >
         {editingId ? "Guardar cambios" : "Guardar registro"}
       </button>

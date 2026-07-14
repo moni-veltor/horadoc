@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 import { money } from "@/core/format";
-import { specialties } from "@/domain/seed";
+import { availableSpecialties, clinicSpecialties } from "@/domain/specialties";
 import type { Clinic, ClinicSummary } from "@/domain/types";
 import { fontDisplay, fontMono, theme } from "@/core/theme";
 import { Card } from "@/shared/ui/Card";
@@ -10,11 +11,15 @@ export function Clinicas({
   resumen,
   onAgregar,
   onActualizarTarifa,
+  onAgregarEspecialidad,
+  onEliminarEspecialidad,
 }: {
   clinics: Clinic[];
   resumen: ClinicSummary[];
   onAgregar: (nombre: string, tarifa: string) => void;
   onActualizarTarifa: (clinicId: string, specialty: string, valor: string) => void;
+  onAgregarEspecialidad: (clinicId: string, specialty: string) => void;
+  onEliminarEspecialidad: (clinicId: string, specialty: string) => void;
 }) {
   const [showForm, setShowForm] = useState(false);
   const [nombre, setNombre] = useState("");
@@ -25,6 +30,8 @@ export function Clinicas({
       <div className="text-lg mb-4" style={fontDisplay}>Clínicas</div>
       {clinics.map((c) => {
         const r = resumen.find((x) => x.clinic.id === c.id);
+        const especialidades = clinicSpecialties(c);
+        const disponibles = availableSpecialties(c);
         return (
           <Card key={c.id}>
             <div className="flex justify-between items-start mb-2">
@@ -36,9 +43,27 @@ export function Clinicas({
             <div className="text-xs mb-2" style={{ color: theme.muted }}>
               Tarifa por hora, según especialidad
             </div>
-            {specialties.map((s) => (
+
+            {especialidades.length === 0 && (
+              <div className="text-xs mb-2" style={{ color: theme.muted }}>
+                Aún no has agregado especialidades a esta clínica.
+              </div>
+            )}
+
+            {especialidades.map((s) => (
               <div key={s} className="flex justify-between items-center py-1">
-                <span className="text-xs">{s}</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => onEliminarEspecialidad(c.id, s)}
+                    className="flex items-center justify-center rounded-full"
+                    style={{ color: theme.muted }}
+                    aria-label={`Quitar ${s}`}
+                    title={`Quitar ${s}`}
+                  >
+                    <X size={14} />
+                  </button>
+                  <span className="text-xs">{s}</span>
+                </div>
                 <div className="flex items-center gap-1">
                   <span className="text-xs" style={{ color: theme.muted }}>$</span>
                   <input
@@ -51,6 +76,26 @@ export function Clinicas({
                 </div>
               </div>
             ))}
+
+            {disponibles.length > 0 ? (
+              <select
+                className="w-full mt-2 p-2.5 rounded-lg border text-sm"
+                style={{ borderColor: theme.primary, color: theme.primary, background: "transparent" }}
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) onAgregarEspecialidad(c.id, e.target.value);
+                }}
+              >
+                <option value="">+ Agregar especialidad</option>
+                {disponibles.map((s) => (
+                  <option key={s} value={s} style={{ color: theme.ink }}>{s}</option>
+                ))}
+              </select>
+            ) : (
+              <div className="text-xs mt-2" style={{ color: theme.muted }}>
+                Todas las especialidades del catálogo están agregadas.
+              </div>
+            )}
           </Card>
         );
       })}
@@ -76,7 +121,7 @@ export function Clinicas({
             placeholder="70000"
           />
           <div className="text-xs mb-3" style={{ color: theme.muted }}>
-            Se aplica a todas las especialidades; luego puedes ajustarla una por una.
+            Será la tarifa por defecto de las especialidades que agregues a esta clínica.
           </div>
           <div className="flex gap-2">
             <button

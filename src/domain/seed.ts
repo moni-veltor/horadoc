@@ -1,14 +1,9 @@
 import { theme } from "@/core/theme";
-import type { Clinic, Entry, Specialty } from "./types";
+import type { Clinic, Entry } from "./types";
 
 // Demo seed data. When persistence lands this gets replaced by the data layer;
 // modules only ever import the typed shapes above, never these literals.
-
-export const specialties: Specialty[] = [
-  "Cardiología",
-  "Medicina interna",
-  "Urgencias",
-];
+// Each clinic carries its own set of specialties (the keys of `rates`).
 
 export const initialClinics: Clinic[] = [
   {
@@ -16,12 +11,14 @@ export const initialClinics: Clinic[] = [
     name: "Clínica Country",
     color: theme.primary,
     rates: { "Cardiología": 80000, "Medicina interna": 75000, "Urgencias": 70000 },
+    defaultRate: 75000,
   },
   {
     id: "c2",
     name: "Hospital San Rafael",
     color: theme.accent,
     rates: { "Cardiología": 68000, "Medicina interna": 60000, "Urgencias": 65000 },
+    defaultRate: 64000,
   },
 ];
 
