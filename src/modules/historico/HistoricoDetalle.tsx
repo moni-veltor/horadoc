@@ -1,3 +1,4 @@
+import { Trash2 } from "lucide-react";
 import { monthLabel, money } from "@/core/format";
 import { monthDetail } from "@/domain/calculations";
 import type { Clinic, Entry } from "@/domain/types";
@@ -10,11 +11,15 @@ export function HistoricoDetalle({
   entries,
   mesKey,
   onVolver,
+  onEditar,
+  onEliminar,
 }: {
   clinics: Clinic[];
   entries: Entry[];
   mesKey: string;
   onVolver: () => void;
+  onEditar: (entry: Entry) => void;
+  onEliminar: (id: string) => void;
 }) {
   const clinicName = (id: string) => clinics.find((c) => c.id === id)?.name || "—";
   const { days, hours, total } = monthDetail(clinics, entries, mesKey);
@@ -35,10 +40,13 @@ export function HistoricoDetalle({
       <PulseDivider />
 
       <div
-        className="text-xs uppercase tracking-wide mb-2"
+        className="text-xs uppercase tracking-wide mb-1"
         style={{ color: theme.muted, letterSpacing: "0.06em" }}
       >
         Detalle por día
+      </div>
+      <div className="text-[11px] mb-2" style={{ color: theme.muted }}>
+        Toca un registro para editarlo
       </div>
       {days.map((d) => (
         <Card key={d.date}>
@@ -47,13 +55,23 @@ export function HistoricoDetalle({
             <div className="text-sm" style={fontMono}>{money(d.total)}</div>
           </div>
           {d.items.map((it) => (
-            <div
-              key={it.id}
-              className="flex justify-between text-xs py-1"
-              style={{ color: theme.muted }}
-            >
-              <span>{clinicName(it.clinicId)} · {it.specialty}</span>
-              <span style={fontMono}>{it.hours}h</span>
+            <div key={it.id} className="flex items-center gap-2 py-1">
+              <button
+                onClick={() => onEditar(it)}
+                className="flex-1 flex justify-between text-xs text-left"
+                style={{ color: theme.muted }}
+              >
+                <span>{clinicName(it.clinicId)} · {it.specialty}</span>
+                <span style={fontMono}>{it.hours}h</span>
+              </button>
+              <button
+                onClick={() => onEliminar(it.id)}
+                className="p-1"
+                aria-label="Eliminar registro"
+                style={{ color: theme.danger }}
+              >
+                <Trash2 size={14} />
+              </button>
             </div>
           ))}
         </Card>

@@ -1,33 +1,23 @@
 import type { Dispatch, SetStateAction } from "react";
 import { clinicSpecialties } from "@/domain/specialties";
-import type { Clinic, Entry, EntryForm } from "@/domain/types";
+import type { Clinic, EntryForm } from "@/domain/types";
 import { fontDisplay, fontMono, theme } from "@/core/theme";
-import { Card } from "@/shared/ui/Card";
 
 export function Registrar({
   clinics,
-  entries,
   form,
   setForm,
   onGuardar,
   editingId,
-  onEditar,
-  onEliminar,
   onCancelarEdicion,
 }: {
   clinics: Clinic[];
-  entries: Entry[];
   form: EntryForm;
   setForm: Dispatch<SetStateAction<EntryForm>>;
   onGuardar: () => void;
   editingId: string | null;
-  onEditar: (entry: Entry) => void;
-  onEliminar: (id: string) => void;
   onCancelarEdicion: () => void;
 }) {
-  const clinicName = (id: string) => clinics.find((c) => c.id === id)?.name || "—";
-  const recientes = [...entries].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 8);
-
   // El dropdown de especialidad depende de la clínica seleccionada.
   const selectedClinic = clinics.find((c) => c.id === form.clinicId);
   const especialidades = selectedClinic ? clinicSpecialties(selectedClinic) : [];
@@ -133,44 +123,6 @@ export function Registrar({
       >
         {editingId ? "Guardar cambios" : "Guardar registro"}
       </button>
-
-      <div
-        className="text-xs uppercase tracking-wide mt-6 mb-2"
-        style={{ color: theme.muted, letterSpacing: "0.06em" }}
-      >
-        Registros recientes
-      </div>
-      {recientes.map((r) => (
-        <Card key={r.id}>
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="text-sm font-medium">{clinicName(r.clinicId)}</div>
-              <div className="text-xs" style={{ color: theme.muted }}>
-                {r.date} · {r.specialty} · <span style={fontMono}>{r.hours}h</span>
-              </div>
-              {r.notes && (
-                <div className="text-xs mt-0.5" style={{ color: theme.muted }}>&quot;{r.notes}&quot;</div>
-              )}
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => onEditar(r)}
-                className="text-xs font-medium"
-                style={{ color: theme.primary }}
-              >
-                Editar
-              </button>
-              <button
-                onClick={() => onEliminar(r.id)}
-                className="text-xs font-medium"
-                style={{ color: theme.danger }}
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </Card>
-      ))}
     </div>
   );
 }

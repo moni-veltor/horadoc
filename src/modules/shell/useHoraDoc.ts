@@ -1,7 +1,12 @@
 import { useMemo, useState } from "react";
 import { CURRENT_MONTH, TODAY } from "@/core/clock";
 import { clinicPalette } from "@/core/theme";
-import { hoursOn, monthlySummary } from "@/domain/calculations";
+import {
+  hoursOn,
+  monthTotal,
+  monthlySummary,
+  previousMonthKey,
+} from "@/domain/calculations";
 import { initialClinics, initialEntries } from "@/domain/seed";
 import { clinicSpecialties } from "@/domain/specialties";
 import type { Clinic, Entry, EntryForm, NewClinicInput, Specialty } from "@/domain/types";
@@ -38,6 +43,16 @@ export function useHoraDoc() {
   );
 
   const hoyTotal = useMemo(() => hoursOn(entries, TODAY), [entries]);
+
+  const todayEntries = useMemo(
+    () => entries.filter((e) => e.date === TODAY),
+    [entries],
+  );
+
+  const totalMesAnterior = useMemo(
+    () => monthTotal(clinics, entries, previousMonthKey(CURRENT_MONTH)),
+    [clinics, entries],
+  );
 
   /** Returns true on success so the form can reset and close. */
   function agregarClinica({ name, department, city }: NewClinicInput): boolean {
@@ -177,6 +192,8 @@ export function useHoraDoc() {
     toast,
     resumen,
     hoyTotal,
+    todayEntries,
+    totalMesAnterior,
     agregarClinica,
     actualizarTarifa,
     agregarEspecialidad,

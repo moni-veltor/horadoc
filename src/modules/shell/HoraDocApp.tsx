@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { Building2, Home, LogOut, PieChart, PlusCircle, Stethoscope } from "lucide-react";
 import { fontBody, fontDisplay, theme } from "@/core/theme";
+import type { Entry } from "@/domain/types";
 import { GradientText } from "@/shared/ui/GradientText";
 import { Inicio } from "@/modules/inicio/Inicio";
 import { Registrar } from "@/modules/registro/Registrar";
@@ -31,6 +32,12 @@ export default function HoraDocApp() {
   const [facturaClinic, setFacturaClinic] = useState(store.clinics[0].id);
   const [mesSeleccionado, setMesSeleccionado] = useState<string | null>(null);
 
+  // Editar un registro (desde Inicio o Histórico): carga el form y abre Registrar.
+  function handleEditar(entry: Entry) {
+    store.editarRegistro(entry);
+    setTab("registrar");
+  }
+
   const resumenActive =
     tab === "resumen" || tab === "factura" || tab === "historico" || tab === "historicoDetalle";
 
@@ -41,7 +48,7 @@ export default function HoraDocApp() {
     >
       <div className="w-full max-w-sm min-h-screen flex flex-col relative" style={{ background: theme.bg }}>
         {/* Header */}
-        <div className="px-5 pt-6 pb-3">
+        <div className="px-5 pt-6 pb-3 no-print">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div
@@ -89,24 +96,23 @@ export default function HoraDocApp() {
             <Inicio
               hoyTotal={store.hoyTotal}
               resumen={store.resumen}
+              todayEntries={store.todayEntries}
+              clinics={store.clinics}
+              totalMesAnterior={store.totalMesAnterior}
               onRegistrar={() => setTab("registrar")}
+              onEditar={handleEditar}
+              onEliminar={store.eliminarRegistro}
             />
           )}
           {tab === "registrar" && (
             <Registrar
               clinics={store.clinics}
-              entries={store.entries}
               form={store.form}
               setForm={store.setForm}
               onGuardar={() => {
                 if (store.guardarRegistro()) setTab("inicio");
               }}
               editingId={store.editingId}
-              onEditar={(entry) => {
-                store.editarRegistro(entry);
-                setTab("registrar");
-              }}
-              onEliminar={store.eliminarRegistro}
               onCancelarEdicion={store.cancelarEdicion}
             />
           )}
@@ -156,13 +162,15 @@ export default function HoraDocApp() {
               entries={store.entries}
               mesKey={mesSeleccionado}
               onVolver={() => setTab("historico")}
+              onEditar={handleEditar}
+              onEliminar={store.eliminarRegistro}
             />
           )}
         </div>
 
         {/* Bottom nav */}
         <div
-          className="fixed bottom-0 w-full max-w-sm flex justify-around py-2 border-t"
+          className="fixed bottom-0 w-full max-w-sm flex justify-around py-2 border-t no-print"
           style={{ background: theme.surface, borderColor: theme.primaryLight }}
         >
           <NavBtn icon={Home} label="Inicio" active={tab === "inicio"} onClick={() => setTab("inicio")} />

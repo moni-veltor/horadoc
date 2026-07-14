@@ -28,13 +28,13 @@ export function Factura({
 
   return (
     <div>
-      <button onClick={onVolver} className="text-xs mb-3" style={{ color: theme.muted }}>
+      <button onClick={onVolver} className="text-xs mb-3 no-print" style={{ color: theme.muted }}>
         ← Volver al resumen
       </button>
       <div className="text-lg mb-3" style={fontDisplay}>Borrador de cuenta de cobro</div>
 
       <select
-        className="w-full mb-4 p-3 rounded-lg border text-sm"
+        className="w-full mb-4 p-3 rounded-lg border text-sm no-print"
         style={{ borderColor: theme.primaryLight, background: theme.surface }}
         value={selected}
         onChange={(e) => setSelected(e.target.value)}
@@ -95,14 +95,15 @@ export function Factura({
       </Card>
 
       <div
-        className="rounded-lg px-3 py-2 mb-3 text-xs"
+        className="rounded-lg px-3 py-2 mb-3 text-xs no-print"
         style={{ background: theme.primaryLight, color: theme.primary }}
       >
         El % de retención es un valor sugerido y editable. Confírmalo con tu contador antes de enviar el documento.
       </div>
 
       <button
-        className="w-full py-3 rounded-xl font-medium text-sm flex items-center justify-center gap-2"
+        onClick={() => window.print()}
+        className="w-full py-3 rounded-xl font-medium text-sm flex items-center justify-center gap-2 no-print"
         style={{ background: theme.primary, color: "#fff" }}
       >
         <FileText size={16} /> Generar PDF

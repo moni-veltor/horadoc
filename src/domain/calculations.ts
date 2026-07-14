@@ -91,3 +91,17 @@ export function hoursOn(entries: Entry[], isoDate: string): number {
     .filter((e) => e.date === isoDate)
     .reduce((s, e) => s + Number(e.hours), 0);
 }
+
+/** Billed total across all clinics for a single month ("YYYY-MM"). */
+export function monthTotal(clinics: Clinic[], entries: Entry[], monthKey: string): number {
+  return entries
+    .filter((e) => e.date.startsWith(monthKey))
+    .reduce((s, e) => s + Number(e.hours) * rateFor(clinics, e), 0);
+}
+
+/** The month key immediately before the given one ("2026-07" → "2026-06"). */
+export function previousMonthKey(monthKey: string): string {
+  const [y, m] = monthKey.split("-").map(Number);
+  const prev = m === 1 ? { y: y - 1, m: 12 } : { y, m: m - 1 };
+  return `${prev.y}-${String(prev.m).padStart(2, "0")}`;
+}
