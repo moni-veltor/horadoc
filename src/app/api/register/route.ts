@@ -13,6 +13,8 @@ export async function POST(request: Request) {
   const name = typeof body.name === "string" ? body.name.trim() : "";
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   const password = typeof body.password === "string" ? body.password : "";
+  const phone =
+    typeof body.phone === "string" && body.phone.trim() ? body.phone.trim() : null;
   const especialidad =
     typeof body.especialidad === "string" && body.especialidad ? body.especialidad : null;
   const registroMedico =
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
 
   const passwordHash = await bcrypt.hash(password, 10);
   await prisma.user.create({
-    data: { name, email, passwordHash, especialidad, registroMedico },
+    data: { name, email, passwordHash, phone, especialidad, registroMedico },
   });
 
   return NextResponse.json({ ok: true }, { status: 201 });

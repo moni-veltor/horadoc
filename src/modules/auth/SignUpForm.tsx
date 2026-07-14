@@ -10,6 +10,7 @@ import { AuthShell, authFieldClass, authFieldStyle } from "./AuthShell";
 const initial = {
   name: "",
   email: "",
+  phone: "",
   password: "",
   especialidad: "",
   registroMedico: "",
@@ -82,6 +83,16 @@ export function SignUpForm() {
           onChange={(e) => update("email", e.target.value)}
           placeholder="tu@correo.com"
           required
+        />
+
+        <label className="text-xs" style={{ color: theme.muted }}>Celular</label>
+        <input
+          type="tel"
+          className={authFieldClass}
+          style={authFieldStyle}
+          value={form.phone}
+          onChange={(e) => update("phone", e.target.value)}
+          placeholder="Ej: 3001234567"
         />
 
         <label className="text-xs" style={{ color: theme.muted }}>Contraseña</label>
