@@ -40,12 +40,9 @@ export function useHoraDoc() {
   const hoyTotal = useMemo(() => hoursOn(entries, TODAY), [entries]);
 
   /** Returns true on success so the form can reset and close. */
-  function agregarClinica({ name, department, city, tarifaBase }: NewClinicInput): boolean {
-    if (!name.trim() || !tarifaBase || Number(tarifaBase) <= 0) {
-      setToast({
-        type: "error",
-        text: "Selecciona una clínica e ingresa una tarifa válida.",
-      });
+  function agregarClinica({ name, department, city }: NewClinicInput): boolean {
+    if (!name.trim()) {
+      setToast({ type: "error", text: "Selecciona una clínica." });
       return false;
     }
     const yaExiste = clinics.some(
@@ -55,8 +52,8 @@ export function useHoraDoc() {
       setToast({ type: "error", text: "Esa clínica ya está agregada." });
       return false;
     }
-    // La clínica nace sin especialidades; el médico las agrega desde su tarjeta.
-    // La tarifa base queda como valor por defecto de cada especialidad nueva.
+    // La clínica nace sin especialidades; el médico las agrega (con su tarifa)
+    // desde la tarjeta de la clínica.
     setClinics((prev) => [
       ...prev,
       {
@@ -65,7 +62,6 @@ export function useHoraDoc() {
         department,
         city,
         rates: {},
-        defaultRate: Number(tarifaBase),
         color: clinicPalette[prev.length % clinicPalette.length],
       },
     ]);

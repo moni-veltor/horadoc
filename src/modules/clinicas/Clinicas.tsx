@@ -34,20 +34,18 @@ export function Clinicas({
   const [ciudad, setCiudad] = useState("");
   const [clinica, setClinica] = useState("");
   const [clinicaManual, setClinicaManual] = useState("");
-  const [tarifa, setTarifa] = useState("");
 
   const ciudades = departamento ? ciudadesDe(departamento) : [];
   const clinicasCiudad = departamento && ciudad ? clinicasDe(departamento, ciudad) : [];
   const esOtra = clinica === OTRA_CLINICA;
   const nombreResuelto = esOtra ? clinicaManual.trim() : clinica;
-  const puedeGuardar = Boolean(nombreResuelto && tarifa && Number(tarifa) > 0);
+  const puedeGuardar = Boolean(nombreResuelto);
 
   function resetForm() {
     setDepartamento("");
     setCiudad("");
     setClinica("");
     setClinicaManual("");
-    setTarifa("");
   }
 
   function guardarClinica() {
@@ -55,7 +53,6 @@ export function Clinicas({
       name: nombreResuelto,
       department: departamento,
       city: ciudad,
-      tarifaBase: tarifa,
     });
     if (ok) {
       resetForm();
@@ -216,17 +213,8 @@ export function Clinicas({
             />
           )}
 
-          <label className="text-xs" style={{ color: theme.muted }}>Tarifa base por hora (COP)</label>
-          <input
-            type="number"
-            className="w-full mb-1 p-2.5 rounded-lg border text-sm"
-            style={{ borderColor: theme.primaryLight, ...fontMono }}
-            value={tarifa}
-            onChange={(e) => setTarifa(e.target.value)}
-            placeholder="70000"
-          />
           <div className="text-xs mb-3" style={{ color: theme.muted }}>
-            Será la tarifa por defecto de las especialidades que agregues a esta clínica.
+            Luego agrégale las especialidades y su tarifa desde la tarjeta de la clínica.
           </div>
           <div className="flex gap-2">
             <button

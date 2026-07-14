@@ -21,7 +21,6 @@ export interface NewClinicInput {
   name: string;
   department?: string;
   city?: string;
-  tarifaBase: string;
 }
 
 export interface Entry {
