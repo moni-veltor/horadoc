@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Building2, Home, PieChart, PlusCircle, Stethoscope } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { Building2, Home, LogOut, PieChart, PlusCircle, Stethoscope } from "lucide-react";
 import { fontBody, fontDisplay, theme } from "@/core/theme";
 import { GradientText } from "@/shared/ui/GradientText";
 import { Inicio } from "@/modules/inicio/Inicio";
@@ -24,6 +25,7 @@ type Tab =
   | "historicoDetalle";
 
 export default function HoraDocApp() {
+  const { data: session } = useSession();
   const store = useHoraDoc();
   const [tab, setTab] = useState<Tab>("inicio");
   const [facturaClinic, setFacturaClinic] = useState(store.clinics[0].id);
@@ -40,19 +42,32 @@ export default function HoraDocApp() {
       <div className="w-full max-w-sm min-h-screen flex flex-col relative" style={{ background: theme.bg }}>
         {/* Header */}
         <div className="px-5 pt-6 pb-3">
-          <div className="flex items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center"
-              style={{ background: theme.gradient }}
-            >
-              <Stethoscope size={16} color="#fff" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center"
+                style={{ background: theme.gradient }}
+              >
+                <Stethoscope size={16} color="#fff" />
+              </div>
+              <span className="text-xl" style={fontDisplay}>
+                Hora<GradientText>Doc</GradientText>
+              </span>
             </div>
-            <span className="text-xl" style={fontDisplay}>
-              Hora<GradientText>Doc</GradientText>
-            </span>
+            {session?.user && (
+              <button
+                onClick={() => signOut({ callbackUrl: "/sign-in" })}
+                className="flex items-center gap-1 text-xs"
+                style={{ color: theme.muted }}
+              >
+                <LogOut size={14} /> Salir
+              </button>
+            )}
           </div>
           <div className="text-[11px] mt-0.5 ml-10" style={{ color: theme.muted }}>
-            Registra tus horas. Enfocado en lo que importa.
+            {session?.user?.name
+              ? `Hola, ${session.user.name}`
+              : "Registra tus horas. Enfocado en lo que importa."}
           </div>
         </div>
 

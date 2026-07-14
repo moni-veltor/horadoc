@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import { Providers } from "./providers";
 import "./globals.css";
 
 // Loaded once and exposed as --font-poppins; the design tokens in
@@ -21,7 +22,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
-      <body className={poppins.variable}>{children}</body>
+      <body className={poppins.variable}>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
