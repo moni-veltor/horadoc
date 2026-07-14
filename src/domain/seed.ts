@@ -8,15 +8,19 @@ import type { Clinic, Entry } from "./types";
 export const initialClinics: Clinic[] = [
   {
     id: "c1",
-    name: "Clínica Country",
+    name: "Clínica del Country",
     color: theme.primary,
+    department: "Bogotá D.C.",
+    city: "Bogotá",
     rates: { "Cardiología": 80000, "Medicina interna": 75000, "Urgencias": 70000 },
     defaultRate: 75000,
   },
   {
     id: "c2",
-    name: "Hospital San Rafael",
+    name: "Fundación Valle del Lili",
     color: theme.accent,
+    department: "Valle del Cauca",
+    city: "Cali",
     rates: { "Cardiología": 68000, "Medicina interna": 60000, "Urgencias": 65000 },
     defaultRate: 64000,
   },

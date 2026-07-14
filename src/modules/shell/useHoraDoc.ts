@@ -4,7 +4,7 @@ import { clinicPalette } from "@/core/theme";
 import { hoursOn, monthlySummary } from "@/domain/calculations";
 import { initialClinics, initialEntries } from "@/domain/seed";
 import { clinicSpecialties } from "@/domain/specialties";
-import type { Clinic, Entry, EntryForm, Specialty } from "@/domain/types";
+import type { Clinic, Entry, EntryForm, NewClinicInput, Specialty } from "@/domain/types";
 
 export interface Toast {
   type: "ok" | "error";
@@ -39,10 +39,21 @@ export function useHoraDoc() {
 
   const hoyTotal = useMemo(() => hoursOn(entries, TODAY), [entries]);
 
-  function agregarClinica(nombre: string, tarifaBase: string) {
-    if (!nombre.trim() || !tarifaBase || Number(tarifaBase) <= 0) {
-      setToast({ type: "error", text: "Ingresa nombre y tarifa válidos." });
-      return;
+  /** Returns true on success so the form can reset and close. */
+  function agregarClinica({ name, department, city, tarifaBase }: NewClinicInput): boolean {
+    if (!name.trim() || !tarifaBase || Number(tarifaBase) <= 0) {
+      setToast({
+        type: "error",
+        text: "Selecciona una clínica e ingresa una tarifa válida.",
+      });
+      return false;
+    }
+    const yaExiste = clinics.some(
+      (c) => c.name.toLowerCase() === name.trim().toLowerCase() && c.city === city,
+    );
+    if (yaExiste) {
+      setToast({ type: "error", text: "Esa clínica ya está agregada." });
+      return false;
     }
     // La clínica nace sin especialidades; el médico las agrega desde su tarjeta.
     // La tarifa base queda como valor por defecto de cada especialidad nueva.
@@ -50,7 +61,9 @@ export function useHoraDoc() {
       ...prev,
       {
         id: "c" + Date.now(),
-        name: nombre,
+        name: name.trim(),
+        department,
+        city,
         rates: {},
         defaultRate: Number(tarifaBase),
         color: clinicPalette[prev.length % clinicPalette.length],
@@ -60,6 +73,7 @@ export function useHoraDoc() {
       type: "ok",
       text: "Clínica agregada. Agrégale especialidades para registrar horas.",
     });
+    return true;
   }
 
   function actualizarTarifa(clinicId: string, specialty: string, valor: string) {

@@ -7,10 +7,21 @@ export interface Clinic {
   id: string;
   name: string;
   color: string;
+  /** Departamento / ciudad where the clinic is located (from the catalog). */
+  department?: string;
+  city?: string;
   /** Hourly rate (COP) per specialty. Its keys are the clinic's specialties. */
   rates: Record<Specialty, number>;
   /** Default hourly rate applied when a new specialty is added to this clinic. */
   defaultRate?: number;
+}
+
+/** Payload for creating a clinic from the catalog (or a manual name). */
+export interface NewClinicInput {
+  name: string;
+  department?: string;
+  city?: string;
+  tarifaBase: string;
 }
 
 export interface Entry {
