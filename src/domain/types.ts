@@ -31,6 +31,13 @@ export interface Entry {
   date: string;
   hours: number;
   notes: string;
+  /**
+   * Hourly rate (COP) frozen at the moment the entry was saved. Historical
+   * records keep their rate even if the clinic's rate later changes.
+   * Optional for backward compatibility: older entries fall back to the
+   * clinic's current rate.
+   */
+  rate?: number;
 }
 
 /** An entry resolved against its clinic's rate. */

@@ -7,8 +7,12 @@ import type {
   RatedEntry,
 } from "./types";
 
-/** Hourly rate for an entry at its clinic (0 if the clinic/rate is missing). */
+/**
+ * Effective hourly rate for an entry: the rate frozen on the entry when it was
+ * saved, or (for older entries without one) the clinic's current rate.
+ */
 export function rateFor(clinics: Clinic[], entry: Entry): number {
+  if (typeof entry.rate === "number") return entry.rate;
   const clinic = clinics.find((c) => c.id === entry.clinicId);
   return clinic?.rates[entry.specialty] ?? 0;
 }

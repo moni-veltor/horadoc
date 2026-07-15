@@ -216,17 +216,22 @@ export function useHoraDoc() {
       setToast({ type: "error", text: "Ingresa un número de horas válido." });
       return false;
     }
+    // Congela la tarifa vigente de la clínica/especialidad en el registro.
+    const clinic = clinics.find((c) => c.id === form.clinicId);
+    const rate = clinic?.rates[form.specialty] ?? 0;
     if (editingId) {
       setEntries((prev) =>
         prev.map((e) =>
-          e.id === editingId ? { ...e, ...form, hours: Number(form.hours) } : e,
+          e.id === editingId
+            ? { ...e, ...form, hours: Number(form.hours), rate }
+            : e,
         ),
       );
       setToast({ type: "ok", text: "Registro actualizado." });
     } else {
       setEntries((prev) => [
         ...prev,
-        { id: "e" + Date.now(), ...form, hours: Number(form.hours) },
+        { id: "e" + Date.now(), ...form, hours: Number(form.hours), rate },
       ]);
       setToast({ type: "ok", text: "Horas registradas." });
     }
