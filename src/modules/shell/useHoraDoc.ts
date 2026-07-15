@@ -105,12 +105,21 @@ export function useHoraDoc() {
     return () => window.removeEventListener("beforeunload", flush);
   }, [clinics, entries, perfil]);
 
-  // Mantener el formulario apuntando a una clínica válida cuando cambian.
+  // Mantener el formulario apuntando a una clínica Y especialidad válidas.
   useEffect(() => {
     setForm((f) => {
-      if (f.clinicId && clinics.some((c) => c.id === f.clinicId)) return f;
+      const clinic = clinics.find((c) => c.id === f.clinicId);
+      if (clinic) {
+        // Clínica válida: asegura que la especialidad también lo sea.
+        const espec = clinicSpecialties(clinic);
+        if (f.specialty && espec.includes(f.specialty)) return f;
+        return { ...f, specialty: espec[0] ?? "" };
+      }
+      // Clínica inválida (o vacía): toma la primera disponible.
       const first = clinics[0];
-      if (!first) return f.clinicId ? { ...f, clinicId: "", specialty: "" } : f;
+      if (!first) {
+        return f.clinicId || f.specialty ? { ...f, clinicId: "", specialty: "" } : f;
+      }
       const espec = clinicSpecialties(first);
       return { ...f, clinicId: first.id, specialty: espec[0] ?? "" };
     });
