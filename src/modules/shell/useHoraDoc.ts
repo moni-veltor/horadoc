@@ -8,7 +8,15 @@ import {
   previousMonthKey,
 } from "@/domain/calculations";
 import { clinicSpecialties } from "@/domain/specialties";
-import type { Clinic, Entry, EntryForm, NewClinicInput, Specialty } from "@/domain/types";
+import { emptyPerfil } from "@/domain/types";
+import type {
+  Clinic,
+  Entry,
+  EntryForm,
+  NewClinicInput,
+  Perfil,
+  Specialty,
+} from "@/domain/types";
 
 export interface Toast {
   type: "ok" | "error";
@@ -26,6 +34,7 @@ const emptyFormPatch = { hours: "", notes: "" };
 export function useHoraDoc() {
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [perfil, setPerfil] = useState<Perfil>(emptyPerfil);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [toast, setToast] = useState<Toast | null>(null);
@@ -49,6 +58,7 @@ export function useHoraDoc() {
         if (!active) return;
         setClinics(Array.isArray(data.clinics) ? data.clinics : []);
         setEntries(Array.isArray(data.entries) ? data.entries : []);
+        setPerfil({ ...emptyPerfil, ...(data.perfil ?? {}) });
         skipSaveRef.current = true; // no re-guardar lo recién cargado
         loadedRef.current = true;
         setLoading(false);
@@ -68,7 +78,7 @@ export function useHoraDoc() {
       skipSaveRef.current = false;
       return;
     }
-    const body = JSON.stringify({ clinics, entries });
+    const body = JSON.stringify({ clinics, entries, perfil });
     const t = setTimeout(() => {
       fetch("/api/state", {
         method: "PUT",
@@ -78,7 +88,7 @@ export function useHoraDoc() {
       }).catch(() => {});
     }, 500);
     return () => clearTimeout(t);
-  }, [clinics, entries]);
+  }, [clinics, entries, perfil]);
 
   // Descargar los últimos cambios si el usuario cierra/recarga antes del debounce.
   useEffect(() => {
@@ -87,13 +97,13 @@ export function useHoraDoc() {
       fetch("/api/state", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clinics, entries }),
+        body: JSON.stringify({ clinics, entries, perfil }),
         keepalive: true,
       }).catch(() => {});
     }
     window.addEventListener("beforeunload", flush);
     return () => window.removeEventListener("beforeunload", flush);
-  }, [clinics, entries]);
+  }, [clinics, entries, perfil]);
 
   // Mantener el formulario apuntando a una clínica válida cuando cambian.
   useEffect(() => {
@@ -164,6 +174,14 @@ export function useHoraDoc() {
           : c,
       ),
     );
+  }
+
+  function actualizarNit(clinicId: string, nit: string) {
+    setClinics((prev) => prev.map((c) => (c.id === clinicId ? { ...c, nit } : c)));
+  }
+
+  function actualizarPerfil(patch: Partial<Perfil>) {
+    setPerfil((p) => ({ ...p, ...patch }));
   }
 
   function agregarEspecialidad(clinicId: string, specialty: Specialty) {
@@ -264,6 +282,7 @@ export function useHoraDoc() {
   return {
     clinics,
     entries,
+    perfil,
     loading,
     form,
     setForm,
@@ -275,6 +294,8 @@ export function useHoraDoc() {
     totalMesAnterior,
     agregarClinica,
     actualizarTarifa,
+    actualizarNit,
+    actualizarPerfil,
     agregarEspecialidad,
     eliminarEspecialidad,
     guardarRegistro,

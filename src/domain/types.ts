@@ -10,6 +10,8 @@ export interface Clinic {
   /** Departamento / ciudad where the clinic is located (from the catalog). */
   department?: string;
   city?: string;
+  /** NIT de la clínica (para la cuenta de cobro). */
+  nit?: string;
   /** Hourly rate (COP) per specialty. Its keys are the clinic's specialties. */
   rates: Record<Specialty, number>;
   /** Default hourly rate applied when a new specialty is added to this clinic. */
@@ -22,6 +24,33 @@ export interface NewClinicInput {
   department?: string;
   city?: string;
 }
+
+/** Datos fiscales del médico, usados en la cuenta de cobro. */
+export interface Perfil {
+  nombre: string;
+  documento: string; // cédula o NIT
+  direccion: string;
+  ciudad: string;
+  telefono: string;
+  email: string;
+  banco: string;
+  tipoCuenta: string; // "Ahorros" | "Corriente"
+  numeroCuenta: string;
+  consecutivo: number; // próximo número de cuenta de cobro
+}
+
+export const emptyPerfil: Perfil = {
+  nombre: "",
+  documento: "",
+  direccion: "",
+  ciudad: "",
+  telefono: "",
+  email: "",
+  banco: "",
+  tipoCuenta: "Ahorros",
+  numeroCuenta: "",
+  consecutivo: 1,
+};
 
 export interface Entry {
   id: string;

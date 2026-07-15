@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const EMPTY = { clinics: [], entries: [] };
+const EMPTY = { clinics: [], entries: [], perfil: {} };
 
 // Estado (clínicas + horas) del médico autenticado.
 export async function GET() {
@@ -21,7 +21,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  let body: { clinics?: unknown; entries?: unknown };
+  let body: { clinics?: unknown; entries?: unknown; perfil?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -31,6 +31,7 @@ export async function PUT(request: Request) {
   const data = {
     clinics: Array.isArray(body.clinics) ? body.clinics : [],
     entries: Array.isArray(body.entries) ? body.entries : [],
+    perfil: body.perfil && typeof body.perfil === "object" ? body.perfil : {},
   };
 
   await prisma.appState.upsert({

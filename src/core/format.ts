@@ -35,3 +35,9 @@ export function dayMonthLabel(iso: string): string {
   const [, m, d] = iso.split("-");
   return `${Number(d)} de ${nombresMes[Number(m) - 1].toLowerCase()}`;
 }
+
+// "2026-07-13" -> "13 de julio de 2026"
+export function longDate(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return `${Number(d)} de ${nombresMes[Number(m) - 1].toLowerCase()} de ${y}`;
+}

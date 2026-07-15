@@ -19,6 +19,7 @@ export function Clinicas({
   resumen,
   onAgregar,
   onActualizarTarifa,
+  onActualizarNit,
   onAgregarEspecialidad,
   onEliminarEspecialidad,
 }: {
@@ -26,6 +27,7 @@ export function Clinicas({
   resumen: ClinicSummary[];
   onAgregar: (input: NewClinicInput) => boolean;
   onActualizarTarifa: (clinicId: string, specialty: string, valor: string) => void;
+  onActualizarNit: (clinicId: string, nit: string) => void;
   onAgregarEspecialidad: (clinicId: string, specialty: string) => void;
   onEliminarEspecialidad: (clinicId: string, specialty: string) => void;
 }) {
@@ -81,6 +83,16 @@ export function Clinicas({
               <div className="text-xs" style={{ color: theme.accent, ...fontMono }}>
                 {r?.hours ?? 0}h · {money(r?.total ?? 0)}
               </div>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs" style={{ color: theme.muted }}>NIT</span>
+              <input
+                className="flex-1 p-1.5 rounded-md border text-xs"
+                style={{ borderColor: theme.primaryLight, ...fontMono }}
+                value={c.nit ?? ""}
+                onChange={(e) => onActualizarNit(c.id, e.target.value)}
+                placeholder="NIT de la clínica (para la cuenta de cobro)"
+              />
             </div>
             <div className="text-xs mb-2" style={{ color: theme.muted }}>
               Tarifa por hora, según especialidad

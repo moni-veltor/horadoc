@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
-import { Building2, Home, LogOut, PieChart, PlusCircle, Stethoscope } from "lucide-react";
+import {
+  Building2,
+  Home,
+  LogOut,
+  PieChart,
+  PlusCircle,
+  Stethoscope,
+  UserRound,
+} from "lucide-react";
 import { fontBody, fontDisplay, theme } from "@/core/theme";
 import type { Entry } from "@/domain/types";
 import { GradientText } from "@/shared/ui/GradientText";
@@ -13,6 +21,7 @@ import { Resumen } from "@/modules/resumen/Resumen";
 import { Factura } from "@/modules/factura/Factura";
 import { Historico } from "@/modules/historico/Historico";
 import { HistoricoDetalle } from "@/modules/historico/HistoricoDetalle";
+import { Perfil } from "@/modules/perfil/Perfil";
 import { NavBtn } from "./NavBtn";
 import { useHoraDoc } from "./useHoraDoc";
 
@@ -23,7 +32,8 @@ type Tab =
   | "resumen"
   | "factura"
   | "historico"
-  | "historicoDetalle";
+  | "historicoDetalle"
+  | "perfil";
 
 export default function HoraDocApp() {
   const { data: session } = useSession();
@@ -72,15 +82,25 @@ export default function HoraDocApp() {
                 Hora<GradientText>Doc</GradientText>
               </span>
             </div>
-            {session?.user && (
+            <div className="flex items-center gap-3">
               <button
-                onClick={() => signOut({ callbackUrl: "/sign-in" })}
-                className="flex items-center gap-1 text-xs"
-                style={{ color: theme.muted }}
+                onClick={() => setTab("perfil")}
+                className="flex items-center text-xs"
+                style={{ color: tab === "perfil" ? theme.primary : theme.muted }}
+                aria-label="Mi perfil"
               >
-                <LogOut size={14} /> Salir
+                <UserRound size={16} />
               </button>
-            )}
+              {session?.user && (
+                <button
+                  onClick={() => signOut({ callbackUrl: "/sign-in" })}
+                  className="flex items-center gap-1 text-xs"
+                  style={{ color: theme.muted }}
+                >
+                  <LogOut size={14} /> Salir
+                </button>
+              )}
+            </div>
           </div>
           <div className="text-[11px] mt-0.5 ml-10" style={{ color: theme.muted }}>
             {session?.user?.name
@@ -133,6 +153,7 @@ export default function HoraDocApp() {
               resumen={store.resumen}
               onAgregar={store.agregarClinica}
               onActualizarTarifa={store.actualizarTarifa}
+              onActualizarNit={store.actualizarNit}
               onAgregarEspecialidad={store.agregarEspecialidad}
               onEliminarEspecialidad={store.eliminarEspecialidad}
             />
@@ -153,7 +174,10 @@ export default function HoraDocApp() {
               resumen={store.resumen}
               selected={facturaClinic}
               setSelected={setFacturaClinic}
+              perfil={store.perfil}
               onVolver={() => setTab("resumen")}
+              onVerPerfil={() => setTab("perfil")}
+              onGenerar={(next) => store.actualizarPerfil({ consecutivo: next })}
             />
           )}
           {tab === "historico" && (
@@ -175,6 +199,13 @@ export default function HoraDocApp() {
               onVolver={() => setTab("historico")}
               onEditar={handleEditar}
               onEliminar={store.eliminarRegistro}
+            />
+          )}
+          {tab === "perfil" && (
+            <Perfil
+              perfil={store.perfil}
+              onActualizar={store.actualizarPerfil}
+              onVolver={() => setTab("inicio")}
             />
           )}
         </div>
