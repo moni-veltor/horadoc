@@ -31,6 +31,21 @@ export function Registrar({
     setForm({ ...form, clinicId, specialty });
   }
 
+  if (clinics.length === 0) {
+    return (
+      <div>
+        <div className="text-lg mb-4" style={fontDisplay}>Registrar horas</div>
+        <div
+          className="rounded-lg px-3 py-3 text-sm"
+          style={{ background: theme.accentLight, color: theme.accent }}
+        >
+          Aún no tienes clínicas. Agrega tu primera clínica en la pestaña
+          Clínicas para empezar a registrar horas.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">

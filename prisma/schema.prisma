@@ -16,13 +16,23 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
+  id             String    @id @default(cuid())
+  email          String    @unique
   passwordHash   String
   name           String
   phone          String?
   especialidad   String?
   registroMedico String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  appState       AppState?
+}
+
+// Estado de la app por médico (clínicas + horas) como documento JSON.
+// Simple para esta etapa; se puede normalizar más adelante sin cambiar la UI.
+model AppState {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data      Json
+  updatedAt DateTime @updatedAt
 }

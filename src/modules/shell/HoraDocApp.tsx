@@ -29,7 +29,7 @@ export default function HoraDocApp() {
   const { data: session } = useSession();
   const store = useHoraDoc();
   const [tab, setTab] = useState<Tab>("inicio");
-  const [facturaClinic, setFacturaClinic] = useState(store.clinics[0].id);
+  const [facturaClinic, setFacturaClinic] = useState("");
   const [mesSeleccionado, setMesSeleccionado] = useState<string | null>(null);
 
   // Editar un registro (desde Inicio o Histórico): carga el form y abre Registrar.
@@ -40,6 +40,17 @@ export default function HoraDocApp() {
 
   const resumenActive =
     tab === "resumen" || tab === "factura" || tab === "historico" || tab === "historicoDetalle";
+
+  if (store.loading) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: theme.bg, color: theme.muted, ...fontBody }}
+      >
+        Cargando…
+      </div>
+    );
+  }
 
   return (
     <div
