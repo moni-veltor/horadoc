@@ -25,6 +25,22 @@ export interface NewClinicInput {
   city?: string;
 }
 
+/** Una cuenta de cobro emitida (para el seguimiento de cartera). */
+export interface Cuenta {
+  id: string;
+  numero: number; // consecutivo asignado al emitir
+  clinicId: string;
+  clinicName: string; // snapshot del nombre de la clínica
+  mes: string; // "YYYY-MM" facturado
+  fechaEmision: string; // ISO "YYYY-MM-DD"
+  subtotal: number;
+  retencionPct: number;
+  retencion: number;
+  total: number; // neto a pagar
+  estado: "emitida" | "pagada";
+  fechaPago?: string; // ISO, cuando se marca pagada
+}
+
 /** Datos fiscales del médico, usados en la cuenta de cobro. */
 export interface Perfil {
   nombre: string;

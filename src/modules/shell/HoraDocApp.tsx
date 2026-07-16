@@ -21,6 +21,7 @@ import { Resumen } from "@/modules/resumen/Resumen";
 import { Factura } from "@/modules/factura/Factura";
 import { Historico } from "@/modules/historico/Historico";
 import { HistoricoDetalle } from "@/modules/historico/HistoricoDetalle";
+import { Cartera } from "@/modules/cartera/Cartera";
 import { Perfil } from "@/modules/perfil/Perfil";
 import { NavBtn } from "./NavBtn";
 import { useHoraDoc } from "./useHoraDoc";
@@ -33,6 +34,7 @@ type Tab =
   | "factura"
   | "historico"
   | "historicoDetalle"
+  | "cartera"
   | "perfil";
 
 export default function HoraDocApp() {
@@ -49,7 +51,11 @@ export default function HoraDocApp() {
   }
 
   const resumenActive =
-    tab === "resumen" || tab === "factura" || tab === "historico" || tab === "historicoDetalle";
+    tab === "resumen" ||
+    tab === "factura" ||
+    tab === "historico" ||
+    tab === "historicoDetalle" ||
+    tab === "cartera";
 
   if (store.loading) {
     return (
@@ -166,6 +172,7 @@ export default function HoraDocApp() {
                 setTab("factura");
               }}
               onVerHistorico={() => setTab("historico")}
+              onVerCartera={() => setTab("cartera")}
             />
           )}
           {tab === "factura" && (
@@ -175,9 +182,10 @@ export default function HoraDocApp() {
               selected={facturaClinic}
               setSelected={setFacturaClinic}
               perfil={store.perfil}
+              cuentas={store.cuentas}
               onVolver={() => setTab("resumen")}
               onVerPerfil={() => setTab("perfil")}
-              onGenerar={(next) => store.actualizarPerfil({ consecutivo: next })}
+              onEmitir={store.emitirCuenta}
             />
           )}
           {tab === "historico" && (
@@ -199,6 +207,13 @@ export default function HoraDocApp() {
               onVolver={() => setTab("historico")}
               onEditar={handleEditar}
               onEliminar={store.eliminarRegistro}
+            />
+          )}
+          {tab === "cartera" && (
+            <Cartera
+              cuentas={store.cuentas}
+              onMarcarPagada={store.marcarPagada}
+              onVolver={() => setTab("resumen")}
             />
           )}
           {tab === "perfil" && (

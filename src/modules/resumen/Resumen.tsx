@@ -10,10 +10,12 @@ export function Resumen({
   resumen,
   onVerFactura,
   onVerHistorico,
+  onVerCartera,
 }: {
   resumen: ClinicSummary[];
   onVerFactura: (clinicId: string) => void;
   onVerHistorico: () => void;
+  onVerCartera: () => void;
 }) {
   const totalMes = summaryTotal(resumen);
   return (
@@ -24,13 +26,22 @@ export function Resumen({
       <div className="text-3xl mb-2" style={{ ...fontMono, color: theme.accent }}>
         {money(totalMes)}
       </div>
-      <button
-        onClick={onVerHistorico}
-        className="text-xs font-medium mb-2"
-        style={{ color: theme.primary }}
-      >
-        Ver histórico por meses →
-      </button>
+      <div className="flex gap-4 mb-2">
+        <button
+          onClick={onVerHistorico}
+          className="text-xs font-medium"
+          style={{ color: theme.primary }}
+        >
+          Ver histórico por meses →
+        </button>
+        <button
+          onClick={onVerCartera}
+          className="text-xs font-medium"
+          style={{ color: theme.primary }}
+        >
+          Ver cartera / cobros →
+        </button>
+      </div>
       <PulseDivider color={theme.accent} />
       {resumen.map(({ clinic, hours, total }) => (
         <Card key={clinic.id}>

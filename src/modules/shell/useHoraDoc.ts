@@ -11,6 +11,7 @@ import { clinicSpecialties } from "@/domain/specialties";
 import { emptyPerfil } from "@/domain/types";
 import type {
   Clinic,
+  Cuenta,
   Entry,
   EntryForm,
   NewClinicInput,
@@ -35,6 +36,7 @@ export function useHoraDoc() {
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [perfil, setPerfil] = useState<Perfil>(emptyPerfil);
+  const [cuentas, setCuentas] = useState<Cuenta[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [toast, setToast] = useState<Toast | null>(null);
@@ -59,6 +61,7 @@ export function useHoraDoc() {
         setClinics(Array.isArray(data.clinics) ? data.clinics : []);
         setEntries(Array.isArray(data.entries) ? data.entries : []);
         setPerfil({ ...emptyPerfil, ...(data.perfil ?? {}) });
+        setCuentas(Array.isArray(data.cuentas) ? data.cuentas : []);
         skipSaveRef.current = true; // no re-guardar lo recién cargado
         loadedRef.current = true;
         setLoading(false);
@@ -78,7 +81,7 @@ export function useHoraDoc() {
       skipSaveRef.current = false;
       return;
     }
-    const body = JSON.stringify({ clinics, entries, perfil });
+    const body = JSON.stringify({ clinics, entries, perfil, cuentas });
     const t = setTimeout(() => {
       fetch("/api/state", {
         method: "PUT",
@@ -88,7 +91,7 @@ export function useHoraDoc() {
       }).catch(() => {});
     }, 500);
     return () => clearTimeout(t);
-  }, [clinics, entries, perfil]);
+  }, [clinics, entries, perfil, cuentas]);
 
   // Descargar los últimos cambios si el usuario cierra/recarga antes del debounce.
   useEffect(() => {
@@ -97,13 +100,13 @@ export function useHoraDoc() {
       fetch("/api/state", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clinics, entries, perfil }),
+        body: JSON.stringify({ clinics, entries, perfil, cuentas }),
         keepalive: true,
       }).catch(() => {});
     }
     window.addEventListener("beforeunload", flush);
     return () => window.removeEventListener("beforeunload", flush);
-  }, [clinics, entries, perfil]);
+  }, [clinics, entries, perfil, cuentas]);
 
   // Mantener el formulario apuntando a una clínica Y especialidad válidas.
   useEffect(() => {
@@ -191,6 +194,53 @@ export function useHoraDoc() {
 
   function actualizarPerfil(patch: Partial<Perfil>) {
     setPerfil((p) => ({ ...p, ...patch }));
+  }
+
+  /** Emite (registra en cartera) la cuenta de cobro del mes para una clínica.
+   *  Idempotente por clínica+mes: si ya existe, la devuelve sin duplicar. */
+  function emitirCuenta(input: {
+    clinicId: string;
+    clinicName: string;
+    mes: string;
+    subtotal: number;
+    retencionPct: number;
+  }): Cuenta {
+    const existente = cuentas.find(
+      (c) => c.clinicId === input.clinicId && c.mes === input.mes,
+    );
+    if (existente) return existente;
+    const retencion = input.subtotal * (input.retencionPct / 100);
+    const cuenta: Cuenta = {
+      id: "cta" + Date.now(),
+      numero: perfil.consecutivo,
+      clinicId: input.clinicId,
+      clinicName: input.clinicName,
+      mes: input.mes,
+      fechaEmision: TODAY,
+      subtotal: input.subtotal,
+      retencionPct: input.retencionPct,
+      retencion,
+      total: input.subtotal - retencion,
+      estado: "emitida",
+    };
+    setCuentas((prev) => [...prev, cuenta]);
+    setPerfil((p) => ({ ...p, consecutivo: p.consecutivo + 1 }));
+    setToast({
+      type: "ok",
+      text: `Cuenta de cobro N° ${cuenta.numero} registrada en cartera.`,
+    });
+    return cuenta;
+  }
+
+  function marcarPagada(cuentaId: string) {
+    setCuentas((prev) =>
+      prev.map((c) =>
+        c.id === cuentaId
+          ? { ...c, estado: "pagada" as const, fechaPago: TODAY }
+          : c,
+      ),
+    );
+    setToast({ type: "ok", text: "Cuenta marcada como pagada." });
   }
 
   function agregarEspecialidad(clinicId: string, specialty: Specialty) {
@@ -292,6 +342,7 @@ export function useHoraDoc() {
     clinics,
     entries,
     perfil,
+    cuentas,
     loading,
     form,
     setForm,
@@ -305,6 +356,8 @@ export function useHoraDoc() {
     actualizarTarifa,
     actualizarNit,
     actualizarPerfil,
+    emitirCuenta,
+    marcarPagada,
     agregarEspecialidad,
     eliminarEspecialidad,
     guardarRegistro,
